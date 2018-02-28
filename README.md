@@ -1,4 +1,4 @@
-# web
+# WEB
 前端学习--->html+css+JS
 ## Demo(小模块):
   1. 简单日历，
