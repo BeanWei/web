@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Weather</title>
+  <script src="http://libs.baidu.com/jquery/2.1.4/jquery.min.js"></script>
+  <script src="http://pv.sohu.com/cityjson?ie=utf-8"></script> 
+  <style>
+    body{
+        background: #f2f2f2;
+        margin: 40px;
+    }
+    * {
+      margin: 0;
+      padding: 0;
+      font-family: "microsoft yahei",sans-serif;
+    }
+    div {
+      display: block;
+    }
+    span input {
+      display: inline-block;
+    }
+    .weather-box {
+      padding: 10px;
+      width: 450px;
+      height: 275px;
+      background-color: #C1FFC1;
+      background: url(images/weatherModuleBg.jpg);
+      box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.1);
+    }
+    .wb-top {
+      width: 100%;  
+      height: 40px;  
+      padding: 0; 
+      text-align: center;
+      position: relative;
+      border-bottom: 1px solid rgba(0,0,0,0.1);
+    }
+    .wb-top .city {
+      height: 40px;
+      line-height: 40px;
+      text-align: left;
+      font-size: 20px;
+      font-weight: bold;
+      position: absolute;
+    }
+    .wb-top .weather-query {
+      float: right;
+      width: 218px;
+      height: 40px;
+      line-height: 40px;
+      position: relative;
+      right: 0;
+      display: block;
+    }
+    .choosecity {
+      font-size: 14px;
+    }
+    .choosecity input {
+      border-radius: 15px;
+      text-align: center;
+      outline: none;
+      border: 1px solid #fff;
+      background-color: rgba(0,0,0,0);
+    }
+    .updateButton {
+      display: block;
+      height: 17px;
+      width: 20px;
+      position: absolute;
+      margin: auto;
+      right:0;top:0;bottom:0;
+      background: url(images/refresh.png) no-repeat center 0;
+      background-size: 18px 18px;
+      cursor: pointer;
+    }
+    .wb-mid {
+      width: 100%;
+      height: 130px;
+      margin-top: 5px;
+      background-color: rgba(0,0,0,0);
+    }
+    .todayWeather {
+      width: 48%;
+      height: 130px;
+      background-color: rgba(0,0,0,0);
+      display: block;
+      float: left;
+    }
+    .todayWeather p {
+      height: 30px;
+      line-height: 30px;
+      font-weight: bold;
+      text-align: center;
+      margin-top: 2px;
+      margin-bottom: 2px;
+      background-color: rgba(0,0,0,0);
+    }
+    .todayOtherInfo {
+      width: 48%;
+      height: 130px;
+      background-color: rgba(0,0,0,0);
+      display: block;
+      float: right;
+    }
+    .todayOtherInfo .nowTemp {
+      height: 30px;
+      line-height: 30px;
+      margin-top: 3px;
+      margin-bottom: 4px;
+      font-size: 14px;
+      background-color: rgba(0,0,0,0);
+    }
+    .todayOtherInfo .ganmao {
+      background-color: rgba(0,0,0,0);
+    }
+    .wb-bot {
+      width: 450px;
+      height: 100px;
+      margin-top: 8px;
+    }
+    .futureWeather {
+      width: 111.5px;
+      height: 100px;
+      background-color: rgba(0,0,0,0);
+      list-style: none;
+      display: block;
+      float: left;
+      /* border-left: 1px solid rgba(0,0,0,0.1); */
+    }
+    .futureWeather p {
+      height: 30px;
+      line-height: 30px;
+      margin-top: 2px;
+      margin-bottom: 2px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="weather-box">
+    <div class="wb-top">
+      <div class="city">城市</div>
+      <div class="weather-query">
+        <span class="choosecity">城市:<input type="text" name="city" class="query-city" placeholder="天气查询"></span>
+        <span class="updateButton"></span>
+      </div>
+    </div>
+    <div class="wb-mid">
+      <div class="todayWeather">
+        <p class="todayTemprange"></p>
+        <p class="todayWeatherType"></p>
+        <p class="fengli"></p>
+        <p class="fengxiang"></p>
+      </div>
+      <div class="todayOtherInfo">
+        <p class="nowTemp"></p>
+        <p class="ganmao"></p>
+      </div>
+    </div>
+    <div class="wb-bot">
+      <ul>
+        <li class="futureWeather">
+          <p class="futureDate"></p>
+          <p class="futureTemprange"></p>
+          <p class="futureWeatherType"></p>
+        </li>
+        <li class="futureWeather">
+          <p class="futureDate"></p>
+          <p class="futureTemprange"></p>
+          <p class="futureWeatherType"></p>
+        </li>
+        <li class="futureWeather">
+          <p class="futureDate"></p>
+          <p class="futureTemprange"></p>
+          <p class="futureWeatherType"></p>
+        </li>
+        <li class="futureWeather">
+          <p class="futureDate"></p>
+          <p class="futureTemprange"></p>
+          <p class="futureWeatherType"></p>
+        </li>
+      </ul>
+    </div>
+  </div>
+  <script type="text/javascript">
+  function getIPCity(){
+    $(".city").text(returnCitySN["cname"]);
+  }
+  function weatherUpdate() {
+    var city=$(".query-city").val() || returnCitySN["cname"];
+    var url="https://www.apiopen.top/weatherApi?city="+city;
+    $.ajax({
+      url: url,
+      type: "GET",
+      dataType: "json",
+      timeout: 1000,
+      cache: false,
+      // beforeSend: LoadFunction,
+      error: erryFunction,
+      success: succFunction
+    })
+    // function LoadFunction(){
+    //   $(".todayWeather").html("加载中···");
+    // }
+    function erryFunction(){
+      $(".city").html("加载失败");
+    }
+    function succFunction(info) {
+      var getWeather=info;
+      var reTemprange=/[\u4e00-\u9fa5]/g;
+      var refengli=/\d+/;  //\u003c![CDATA[\u003c3级]]\u003e
+      if (getWeather.code===200){
+        $(".todayTemprange").text((getWeather.data.forecast[0].low+"~"+getWeather.data.forecast[0].high).replace(reTemprange,""));
+        $(".todayWeatherType").text(getWeather.data.forecast[0].type);
+        $(".fengli").text("风力：<"+(getWeather.data.forecast[0].fengli).match(refengli).join("")+"级");
+        $(".fengxiang").text(getWeather.data.forecast[0].fengxiang);
+        $(".nowTemp").text("实时:"+getWeather.data.wendu+"℃");
+        $(".ganmao").prepend("<b>感冒指数:</b><br>"+getWeather.data.ganmao);
+        $(".wb-bot ul li").each(function(index){
+          var idx=index+1;
+          var future=getWeather.data.forecast[idx];
+          $(this).find(".futureDate").text(future.date);
+          $(this).find(".futureTemprange").text((future.low+"~"+future.high).replace(reTemprange,""));
+          $(this).find(".futureWeatherType").text(future.type);
+        });
+      }
+    }
+  }   
+  getIPCity() 
+  weatherUpdate();
+  $(".weather-query .updateButton").click(function(event){
+    weatherUpdate();
+  });
+  </script>
+</body>
+</html>

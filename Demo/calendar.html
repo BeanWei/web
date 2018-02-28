@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+ <head>
+  <meta name="generator" content="Hugo 0.21" />
+  <meta charset="UTF-8" />
+  <title>Demo</title>
+  <style>
+    body{
+        background: #f2f2f2;
+        margin: 40px;
+    }
+    * {
+        margin: 0;
+        padding: 0;
+    }
+    .calendar {
+        width: 450px;
+        height: 350px;
+        background: #fff;
+        box-shadow: 0px 1px 1px rgba(0,0,0,0.1);
+    }
+    .calendar .title {
+        height: 70px;
+        border-bottom: 1px solid rgba(0,0,0,0.1);
+        text-align: center;
+        position: relative;
+    }
+    
+    #calendar-title{
+        font-size:25px;
+        font-family:arial;
+        font-weight:bold;
+        text-transform:uppercase;
+        padding:14px 0 0 0;
+    }
+    #calendar-subtitle {
+        font-weight: normal;
+        font-size: 15px;
+        font-family: Arial, Helvetica, sans-serif;
+    }
+    #prev {
+        text-indent:-9999px;
+        position:absolute;
+        left:0;
+        top:0;
+        width:60px;
+        height:70px;
+        background: url(images/prev.png) no-repeat 50% 50%;
+    }
+    #next {
+        text-indent:-9999px;
+        position:absolute;
+        right:0;
+        top:0;
+        width:60px;
+        height:70px;
+        background: url(images/next.png) no-repeat 50% 50%;
+    }
+    .body {
+        padding: 10px 20px;
+    }
+    .body-list ul {
+        width: 100%;
+        font-family: Arial, Helvetica, sans-serif;
+        font-weight: bold;
+        font-size: 14px;
+    }
+    .body-list ul li {
+        width: 14.28%;
+        height: 36px;
+        line-height: 36px;
+        list-style-type: none;
+        display: block;
+        box-sizing: border-box;
+        float: left;
+        text-align: center;
+    }
+    .lightgrey{
+        color:#a8a8a8;
+    }
+    .darkgrey{
+        color:#565656;
+    }
+    .green {
+        color:#6ac13c;    
+    }
+    .greenbox{
+        border:1px solid #6ac13c;
+        background:#e9f8df;
+    }
+  </style>
+ </head>
+ <body>
+    <div class="calendar">
+        <div class="title">
+            <h1 class="green" id="calendar-title">Month</h1>
+            <h2 class="green" id="calendar-subtitle">Year</h2>
+            <a href="" id='prev'>Prev Month</a>
+            <a href="" id='next'>Next Month</a>
+        </div>
+        <div class="body">
+            <div class="lightgrey body-list">
+                <ul>
+                    <li>Sun</li>
+                    <li>Mon</li>
+                    <li>Tue</li>
+                    <li>Wed</li>
+                    <li>Thu</li>
+                    <li>Fri</li>
+                    <li>Sat</li>
+                </ul>
+            </div>
+            <div class="darkgrey body-list">
+                <ul id="days">
+                </ul>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript">
+    var month_olympic = [31,29,31,30,31,30,31,31,30,31,30,31];
+    var month_normal = [31,28,31,30,31,30,31,31,30,31,30,31];
+    var month_name = ["January","Febrary","March","April","May","June","July","Auguest","September","October","November","December"];
+    var holder = document.getElementById("days");
+    var prev = document.getElementById("prev");
+    var next = document.getElementById("next");
+    var ctitle = document.getElementById("calendar-title");
+    var csubtitle = document.getElementById("calendar-subtitle");
+    var my_date = new Date();
+    var my_year = my_date.getFullYear();
+    var my_month = my_date.getMonth();
+    var my_day = my_date.getDate();
+    //日期交互
+    prev.onclick = function(e){
+        e.preventDefault();
+        my_month--;
+        if(my_month<0){
+            my_year--;
+            my_month = 11;
+        }
+        refreshDate();
+    }
+    next.onclick = function(e){
+        e.preventDefault();
+        my_month++;
+        if(my_month>11){
+            my_year++;
+            my_month = 0;
+        }
+        refreshDate();
+    }
+    //渲染月份显示
+    function refreshDate() {
+        var str = "";
+        var totalDay = daysMonth(my_month,my_year); 
+        var firstDay = dayStart(my_month,my_year);
+        var myclass;
+        //起始日之前的日期设为空白
+        for (var i=0; i<firstDay; i++) { 
+            str += "<li></li>";//此处的li标签要注意格式<li><li>这样子是不对的
+        }
+        for (var i=1; i<=totalDay; i++) {
+            if ((i<my_day && my_year===my_date.getFullYear() && my_month===my_date.getMonth()) || my_year<my_date.getFullYear() || (my_year===my_date.getFullYear() && my_month<my_date.getMonth())) {
+                myclass = "class='lightgrey'";
+            }else if (i===my_day && my_year===my_date.getFullYear() && my_month===my_date.getMonth()) {
+                myclass = "class='green greenbox'";
+            }else {
+                myclass = "class='darkgrey'";
+            }
+            str += "<li "+myclass+">"+i+"</li>"; //！li 的前面要加一个空格
+        }
+        holder.innerHTML = str; //设置日期显示
+        ctitle.innerHTML = month_name[my_month];//设置月份显示
+        csubtitle.innerHTML = my_year; //设置年份显示
+    }
+    //第一天是星期几
+    function dayStart(month,year) {
+        var tmpDate = new Date(year,month,1);
+        return (tmpDate.getDay());
+    }
+    //判断是否闰年 获取某月份的总天数
+    function daysMonth(month,year) {
+        var tmp = year % 4;
+        if (tmp === 0) {
+            return (month_olympic[month]);
+        } else {
+            return (month_normal[month]);
+        }
+    }
+    // !!! 调用月份渲染函数 !!!
+    refreshDate();
+    </script>
+ </body>
+</html>
